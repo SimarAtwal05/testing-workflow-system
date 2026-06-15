@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  HEAD
+  ENGINEER
+}
+
+enum RequestStatus {
+  DRAFT
+  SUBMITTED
+  ASSIGNED
+  IN_PROGRESS
+  PENDING_APPROVAL
+  APPROVED
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role
+
+  createdAt DateTime @default(now())
+  createdRequests TestingRequest[] @relation("CreatedRequests")
+
+  assignedRequests TestingRequest[] @relation("AssignedRequests")
+}
+
+enum TestType {
+  NDT
+  DT
+}
+
+model TestingRequest {
+  id Int @id @default(autoincrement())
+
+  testType TestType
+
+  temperature Float?
+
+  status RequestStatus
+
+  createdAt DateTime @default(now())
+
+  createdById Int
+  createdBy User @relation("CreatedRequests", fields:[createdById], references:[id])
+
+  assignedEngineerId Int?
+  assignedEngineer User? @relation("AssignedRequests", fields:[assignedEngineerId], references:[id])
+
+  result TestingResult?
+}
+
+model TestingResult {
+  id Int @id @default(autoincrement())
+
+  observations String
+
+  conclusion String
+
+  status String @default("DRAFT")
+
+  submittedAt DateTime @default(now())
+
+  requestId Int @unique
+
+  request TestingRequest @relation(fields:[requestId], references:[id])
+}
