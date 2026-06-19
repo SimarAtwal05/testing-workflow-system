@@ -11,6 +11,7 @@ enum Role {
   ADMIN
   HEAD
   ENGINEER
+  LLM_REVIEWER
 }
 
 enum RequestStatus {
